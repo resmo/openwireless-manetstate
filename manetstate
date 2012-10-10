@@ -1,0 +1,40 @@
+#!/usr/bin/env python3.2
+import argparse
+import sys
+import http.client
+import urllib.parse
+import time
+import binascii
+
+parser = argparse.ArgumentParser(description='Updates manetstate.')
+parser.add_argument('-i','--ip', help='The IP of the wifi interface.', required=True)
+args = parser.parse_args()
+
+ip = args.ip
+timestamp = time.time()
+txtinfo_data = ''
+
+try:
+	conn = http.client.HTTPConnection('127.0.0.1:2006')
+	conn.request("GET", "/")
+	res = conn.getresponse()
+	data = res.read()
+	txtinfo_data = binascii.hexlify(data)
+except:
+	print('Error while getting txtinfo')	
+	sys.exit(1)
+finally:
+	conn.close()
+
+try:
+	conn = http.client.HTTPConnection('status.openwireless.ch')
+	params = urllib.parse.urlencode({'date': timestamp, 'enc': 'hex', 'ip': ip, 'txtinfo': txtinfo_data})
+	headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
+	conn.request("POST", "/manetstate/update", params, headers)
+	res = conn.getresponse()
+	print(res.reason)
+except:
+	print('Error while updating status')
+	sys.exit(1)
+finally:
+	conn.close()
