@@ -21,7 +21,8 @@ try:
 	data = res.read()
 	txtinfo_data = binascii.hexlify(data)
 except:
-	print('Error while getting txtinfo')	
+	print >> sys.stderr, 'Error while getting txtinfo'
+	
 	sys.exit(1)
 finally:
 	conn.close()
@@ -34,7 +35,7 @@ try:
 	res = conn.getresponse()
 	print(res.reason)
 except:
-	print('Error while updating status')
+	print >> sys.stderr, 'Error while updating status'
 	sys.exit(1)
 finally:
 	conn.close()
